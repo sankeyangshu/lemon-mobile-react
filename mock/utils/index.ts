@@ -10,7 +10,7 @@ export function resultSuccess<T>(result: Record<string, T>, { message = 'success
     code: 200,
     data: result,
     message,
-    timestamp: new Date().getTime(),
+    timestamp: Date.now(),
   };
 }
 

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { localStg } from '@/lib/storage';
-import { ThemeProviderContext } from './hook';
-
-export const DARK_MODE_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+import { DARK_MODE_MEDIA_QUERY, ThemeProviderContext } from './hook';
 
 type Theme = StorageType.Local['themeMode'];
 

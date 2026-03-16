@@ -27,49 +27,49 @@ function getDirection(x: number, y: number): Direction {
  * @link 移植自vant：https://github.com/3lang3/react-vant/blob/main/packages/react-vant/src/components/hooks/use-touch.ts
  */
 export default function useTouch() {
-  const startX = useRef(0);
-  const startY = useRef(0);
-  const deltaX = useRef(0);
-  const deltaY = useRef(0);
-  const offsetX = useRef(0);
-  const offsetY = useRef(0);
-  const direction = useRef<Direction>('');
-  const firstMove = useRef<boolean>(null);
+  const startXRef = useRef(0);
+  const startYRef = useRef(0);
+  const deltaXRef = useRef(0);
+  const deltaYRef = useRef(0);
+  const offsetXRef = useRef(0);
+  const offsetYRef = useRef(0);
+  const directionRef = useRef<Direction>('');
+  const firstMoveRef = useRef<boolean>(null);
 
-  const isVertical = () => direction.current === 'vertical';
-  const isHorizontal = () => direction.current === 'horizontal';
+  const isVertical = () => directionRef.current === 'vertical';
+  const isHorizontal = () => directionRef.current === 'horizontal';
 
   const reset = () => {
-    deltaX.current = 0;
-    deltaY.current = 0;
-    offsetX.current = 0;
-    offsetY.current = 0;
-    direction.current = '';
-    firstMove.current = null;
+    deltaXRef.current = 0;
+    deltaYRef.current = 0;
+    offsetXRef.current = 0;
+    offsetYRef.current = 0;
+    directionRef.current = '';
+    firstMoveRef.current = null;
   };
 
   const start = ((event: TouchEvent) => {
     reset();
-    startX.current = event.touches[0].clientX;
-    startY.current = event.touches[0].clientY;
+    startXRef.current = event.touches[0].clientX;
+    startYRef.current = event.touches[0].clientY;
   }) as EventListener;
 
   const move = ((event: TouchEvent) => {
     const touch = event.touches[0];
     // safari back will set clientX to negative number
-    deltaX.current = touch.clientX < 0 ? 0 : touch.clientX - startX.current;
-    deltaY.current = touch.clientY - startY.current;
-    offsetX.current = Math.abs(deltaX.current);
-    offsetY.current = Math.abs(deltaY.current);
+    deltaXRef.current = touch.clientX < 0 ? 0 : touch.clientX - startXRef.current;
+    deltaYRef.current = touch.clientY - startYRef.current;
+    offsetXRef.current = Math.abs(deltaXRef.current);
+    offsetYRef.current = Math.abs(deltaYRef.current);
 
-    if (firstMove.current === null) {
-      firstMove.current = true;
+    if (firstMoveRef.current === null) {
+      firstMoveRef.current = true;
     } else {
-      firstMove.current = false;
+      firstMoveRef.current = false;
     }
 
-    if (!direction.current) {
-      direction.current = getDirection(offsetX.current, offsetY.current);
+    if (!directionRef.current) {
+      directionRef.current = getDirection(offsetXRef.current, offsetYRef.current);
     }
   }) as EventListener;
 
@@ -77,15 +77,15 @@ export default function useTouch() {
     move,
     start,
     reset,
-    startX,
-    startY,
-    deltaX,
-    deltaY,
-    offsetX,
-    offsetY,
-    direction,
+    startX: startXRef,
+    startY: startYRef,
+    deltaX: deltaXRef,
+    deltaY: deltaYRef,
+    offsetX: offsetXRef,
+    offsetY: offsetYRef,
+    direction: directionRef,
     isVertical,
     isHorizontal,
-    firstMove,
+    firstMove: firstMoveRef,
   };
 }

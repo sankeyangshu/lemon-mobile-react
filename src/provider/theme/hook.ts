@@ -1,5 +1,7 @@
 import { createContext, use } from 'react';
 
+export const DARK_MODE_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+
 type Theme = StorageType.Local['themeMode'];
 
 interface ThemeProviderState {

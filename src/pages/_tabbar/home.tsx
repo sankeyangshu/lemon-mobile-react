@@ -32,24 +32,24 @@ function RouteComponent() {
     `🔒 ${t('home.auth')}`,
   ];
 
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const animatedIndexes = useRef(new Set<number>());
-  const isInitialLoad = useRef(true);
-  const initialVisibleIndexes = useRef<number[]>([]);
+  const itemRef = useRef<(HTMLDivElement | null)[]>([]);
+  const animatedIndexesRef = useRef(new Set<number>());
+  const isInitialLoadRef = useRef(true);
+  const initialVisibleIndexesRef = useRef<number[]>([]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          const index = itemRefs.current.indexOf(entry.target as HTMLDivElement);
+          const index = itemRef.current.indexOf(entry.target as HTMLDivElement);
 
-          if (entry.isIntersecting && !animatedIndexes.current.has(index)) {
-            animatedIndexes.current.add(index);
+          if (entry.isIntersecting && !animatedIndexesRef.current.has(index)) {
+            animatedIndexesRef.current.add(index);
 
             let delay = 0;
 
-            if (isInitialLoad.current) {
-              const positionInInitial = initialVisibleIndexes.current.indexOf(index);
+            if (isInitialLoadRef.current) {
+              const positionInInitial = initialVisibleIndexesRef.current.indexOf(index);
               if (positionInInitial !== -1) {
                 delay = positionInInitial * 100;
               }
@@ -68,19 +68,19 @@ function RouteComponent() {
       },
     );
 
-    itemRefs.current.forEach((ref, index) => {
-      if (ref) {
-        const rect = ref.getBoundingClientRect();
+    itemRef.current.forEach((el, index) => {
+      if (el) {
+        const rect = el.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
-          initialVisibleIndexes.current.push(index);
+          initialVisibleIndexesRef.current.push(index);
         }
-        observer.observe(ref);
+        observer.observe(el);
       }
     });
 
     const timer = setTimeout(() => {
-      isInitialLoad.current = false;
-    }, initialVisibleIndexes.current.length * 100 + 500);
+      isInitialLoadRef.current = false;
+    }, initialVisibleIndexesRef.current.length * 100 + 500);
 
     return () => {
       observer.disconnect();
@@ -108,7 +108,7 @@ function RouteComponent() {
         {contentList.map((item, index) => (
           <div
             key={item}
-            ref={(el) => { itemRefs.current[index] = el; }}
+            ref={(el) => { itemRef.current[index] = el; }}
             className={`
               box-border w-full scale-80 truncate rounded-xl border border-solid border-[#424242]
               p-3 opacity-0

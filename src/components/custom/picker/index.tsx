@@ -149,7 +149,7 @@ function Picker(props: PickerProps & { ref?: React.Ref<PickerInstance> }) {
     value: valueKey = 'value',
   } = columnsFieldNames;
 
-  const columnRefs = useRef<(PickerColumnInstance | null)[]>([]);
+  const columnRef = useRef<(PickerColumnInstance | null)[]>([]);
 
   // 格式化列数据
   // React Compiler 会自动优化
@@ -219,8 +219,8 @@ function Picker(props: PickerProps & { ref?: React.Ref<PickerInstance> }) {
 
   // 停止惯性滚动
   const stopMomentum = () => {
-    columnRefs.current.forEach((ref) => {
-      ref?.stopMomentum();
+    columnRef.current.forEach((col) => {
+      col?.stopMomentum();
     });
   };
 
@@ -285,7 +285,7 @@ function Picker(props: PickerProps & { ref?: React.Ref<PickerInstance> }) {
           <PickerColumn
             key={columnIndex}
             ref={(el) => {
-              columnRefs.current[columnIndex] = el;
+              columnRef.current[columnIndex] = el;
             }}
             options={column as PickerColumnOption[]}
             value={selectedValues[columnIndex]?.[valueKey] as string | number | undefined}

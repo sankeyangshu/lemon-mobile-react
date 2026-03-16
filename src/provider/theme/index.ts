@@ -1,2 +1,2 @@
-export { useTheme } from './hook';
-export { DARK_MODE_MEDIA_QUERY, ThemeProvider } from './provider';
+export { DARK_MODE_MEDIA_QUERY, useTheme } from './hook';
+export { ThemeProvider } from './provider';

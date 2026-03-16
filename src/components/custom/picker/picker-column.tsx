@@ -3,6 +3,8 @@ import { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import useTouch from '@/hooks/use-touch';
 import { cn } from '@/lib/utils';
 
+const MATRIX_REG = /matrix3?d?\(([^)]+)\)/;
+
 /**
  * 列选项
  */
@@ -123,7 +125,7 @@ function getElementTranslateY(element: HTMLElement) {
   }
 
   // 解析 matrix 或 matrix3d
-  const values = transform.match(/matrix3?d?\(([^)]+)\)/)?.[1].split(', ');
+  const values = transform.match(MATRIX_REG)?.[1].split(', ');
   if (!values) {
     return 0;
   }
@@ -153,12 +155,12 @@ function PickerColumn(props: PickerColumnComponentProps) {
   const itemHeight = unitToPx(_itemHeight);
   const options = restProps.options;
 
-  const wrapper = useRef<HTMLUListElement>(null);
-  const moving = useRef(false);
-  const startOffset = useRef(0);
-  const transitionEndTrigger = useRef<(() => void) | null>(null);
-  const touchStartTime = useRef(0);
-  const momentumOffset = useRef(0);
+  const wrapperRef = useRef<HTMLUListElement>(null);
+  const movingRef = useRef(false);
+  const startOffsetRef = useRef(0);
+  const transitionEndTriggerRef = useRef<(() => void) | null>(null);
+  const touchStartTimeRef = useRef(0);
+  const momentumOffsetRef = useRef(0);
 
   const [offset, setOffset] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -206,8 +208,8 @@ function PickerColumn(props: PickerColumnComponentProps) {
     };
 
     // trigger the change event after transitionend when moving
-    if (moving.current && newOffset !== offset) {
-      transitionEndTrigger.current = trigger;
+    if (movingRef.current && newOffset !== offset) {
+      transitionEndTriggerRef.current = trigger;
     } else {
       trigger();
     }
@@ -247,11 +249,11 @@ function PickerColumn(props: PickerColumnComponentProps) {
 
   // 点击选项
   const onClickItem = (clickIndex: number) => {
-    if (moving.current || readOnly) {
+    if (movingRef.current || readOnly) {
       return;
     }
 
-    transitionEndTrigger.current = null;
+    transitionEndTriggerRef.current = null;
     setDuration(DEFAULT_DURATION);
     setIndex(clickIndex);
   };
@@ -273,12 +275,12 @@ function PickerColumn(props: PickerColumnComponentProps) {
 
   // 停止惯性滚动
   const stopMomentum = () => {
-    moving.current = false;
+    movingRef.current = false;
     setDuration(0);
 
-    if (transitionEndTrigger.current) {
-      transitionEndTrigger.current();
-      transitionEndTrigger.current = null;
+    if (transitionEndTriggerRef.current) {
+      transitionEndTriggerRef.current();
+      transitionEndTriggerRef.current = null;
     }
   };
 
@@ -292,19 +294,19 @@ function PickerColumn(props: PickerColumnComponentProps) {
 
     let currentOffset = offset;
 
-    if (moving.current && wrapper.current) {
-      const translateY = getElementTranslateY(wrapper.current);
+    if (movingRef.current && wrapperRef.current) {
+      const translateY = getElementTranslateY(wrapperRef.current);
       currentOffset = Math.min(0, translateY - baseOffset);
-      startOffset.current = currentOffset;
+      startOffsetRef.current = currentOffset;
     } else {
-      startOffset.current = currentOffset;
+      startOffsetRef.current = currentOffset;
     }
 
     setDuration(0);
     setOffset(currentOffset);
-    touchStartTime.current = Date.now();
-    momentumOffset.current = startOffset.current;
-    transitionEndTrigger.current = null;
+    touchStartTimeRef.current = Date.now();
+    momentumOffsetRef.current = startOffsetRef.current;
+    transitionEndTriggerRef.current = null;
   };
 
   // 触摸移动
@@ -316,11 +318,11 @@ function PickerColumn(props: PickerColumnComponentProps) {
     touch.move(event.nativeEvent);
 
     if (touch.isVertical()) {
-      moving.current = true;
+      movingRef.current = true;
     }
 
     const newOffset = range(
-      startOffset.current + touch.deltaY.current,
+      startOffsetRef.current + touch.deltaY.current,
       -(options.length * itemHeight),
       itemHeight,
     );
@@ -329,21 +331,21 @@ function PickerColumn(props: PickerColumnComponentProps) {
     setDuration(0);
 
     const now = Date.now();
-    if (now - touchStartTime.current > MOMENTUM_LIMIT_TIME) {
-      touchStartTime.current = now;
-      momentumOffset.current = newOffset;
+    if (now - touchStartTimeRef.current > MOMENTUM_LIMIT_TIME) {
+      touchStartTimeRef.current = now;
+      momentumOffsetRef.current = newOffset;
     }
   };
 
   // 触摸结束
   const onTouchEnd = () => {
-    if (readOnly || !moving.current) {
+    if (readOnly || !movingRef.current) {
       return;
     }
 
     // 在事件处理器中调用 Date.now() 是安全的
-    const distance = offset - momentumOffset.current;
-    const elapsedTime = Date.now() - touchStartTime.current;
+    const distance = offset - momentumOffsetRef.current;
+    const elapsedTime = Date.now() - touchStartTimeRef.current;
 
     const allowMomentum
       = elapsedTime < MOMENTUM_LIMIT_TIME
@@ -361,7 +363,7 @@ function PickerColumn(props: PickerColumnComponentProps) {
     // compatible with desktop scenario
     // use setTimeout to skip the click event triggered after touchstart
     setTimeout(() => {
-      moving.current = false;
+      movingRef.current = false;
     }, 0);
   };
 
@@ -424,7 +426,7 @@ function PickerColumn(props: PickerColumnComponentProps) {
       onTouchCancel={onTouchEnd}
     >
       <ul
-        ref={wrapper}
+        ref={wrapperRef}
         className="will-change-transform"
         style={{
           transform: `translate3d(0, ${offset + baseOffset}px, 0)`,

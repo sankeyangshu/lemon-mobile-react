@@ -1,5 +1,7 @@
 import { i18n } from '@/locales';
 
+const BUILD_TIME_META_REG = /<meta name="buildTime" content="(.*)">/;
+
 /**
  * Setup application version notification
  * @descCN 设置应用版本更新通知
@@ -119,7 +121,7 @@ async function getHtmlBuildTime() {
     });
 
     const html = await res.text();
-    const match = html.match(/<meta name="buildTime" content="(.*)">/);
+    const match = html.match(BUILD_TIME_META_REG);
     const buildTime = match?.[1];
 
     return buildTime ?? '';

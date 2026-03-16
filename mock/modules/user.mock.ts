@@ -59,7 +59,7 @@ export default defineMock([
     body: () => {
       const rand = Math.floor(Math.random() * mockExample.length);
       const mockData = mockExample[rand];
-      return resultSuccess({ content: mockData, date: new Date().getTime() });
+      return resultSuccess({ content: mockData, date: Date.now() });
     },
   },
   {

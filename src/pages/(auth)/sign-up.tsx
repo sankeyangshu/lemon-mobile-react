@@ -109,7 +109,7 @@ function RouteComponent() {
       </form>
 
       <div className={`
-        fixed right-5 bottom-10 left-5 mx-5 flex h-5 items-center justify-center text-sm/5
+        fixed inset-x-5 bottom-10 mx-5 flex h-5 items-center justify-center text-sm/5
       `}
       >
         <label className="flex cursor-pointer items-center">

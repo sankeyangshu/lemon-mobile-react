@@ -184,14 +184,14 @@ const Popup: FC<PopupProps & { ref?: Ref<PopupInstanceType> }> = (props) => {
     teleport = () => document.body,
   } = props;
 
-  const opened = useRef(false);
-  const zIndex = useRef<number>(propsZIndex ?? globalZIndex);
+  const openedRef = useRef(false);
+  const zIndexRef = useRef<number>(propsZIndex ?? globalZIndex);
   const popupRef = useRef<HTMLDivElement>(null);
   const [innerVisible, setInnerVisible] = useState(visible);
   const [shouldRender, setShouldRender] = useState(visible);
 
   const popupStyle = {
-    'zIndex': zIndex.current,
+    'zIndex': zIndexRef.current,
     '--tw-duration': `${duration}ms`,
     ...style,
   };
@@ -199,12 +199,12 @@ const Popup: FC<PopupProps & { ref?: Ref<PopupInstanceType> }> = (props) => {
   // 打开弹窗
   const open = () => {
     if (propsZIndex !== undefined) {
-      zIndex.current = propsZIndex;
+      zIndexRef.current = propsZIndex;
     } else {
-      zIndex.current = globalZIndex++;
+      zIndexRef.current = globalZIndex++;
     }
 
-    opened.current = true;
+    openedRef.current = true;
     onOpen?.();
   };
 
@@ -220,7 +220,7 @@ const Popup: FC<PopupProps & { ref?: Ref<PopupInstanceType> }> = (props) => {
       }
     }
 
-    opened.current = false;
+    openedRef.current = false;
     onClose?.();
   };
 
@@ -241,7 +241,7 @@ const Popup: FC<PopupProps & { ref?: Ref<PopupInstanceType> }> = (props) => {
           visible={visible}
           className={overlayClassName}
           style={overlayStyle}
-          zIndex={zIndex.current}
+          zIndex={zIndexRef.current}
           duration={duration}
           lockScroll={lockScroll}
           onClick={handleClickOverlay}

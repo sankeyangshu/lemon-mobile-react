@@ -60,7 +60,7 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * Chart instance
    * @descCN 图表实例
    */
-  const chartInstance = useRef<echarts.ECharts | null>(null);
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
 
   /**
    * Chart options
@@ -74,21 +74,21 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @param show - Whether to show loading
    */
   function toggleLoading(show: boolean) {
-    if (!chartInstance.current)
+    if (!chartInstanceRef.current)
       return;
     if (show) {
       const textColor = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.7)';
       const maskColor = isDark ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.85)';
       const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
 
-      chartInstance.current.showLoading('default', {
+      chartInstanceRef.current.showLoading('default', {
         color: primaryColor,
         textColor,
         fontSize: 16,
         maskColor,
       });
     } else {
-      chartInstance.current.hideLoading();
+      chartInstanceRef.current.hideLoading();
     }
   }
 
@@ -103,7 +103,7 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
 
     const chartTheme = isDark ? 'dark' : 'light';
 
-    chartInstance.current = echarts.init(dom, chartTheme, echartsInitOpts);
+    chartInstanceRef.current = echarts.init(dom, chartTheme, echartsInitOpts);
 
     toggleLoading(true);
   }
@@ -113,9 +113,9 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @descCN 销毁图表实例
    */
   function destroy() {
-    if (chartInstance.current) {
-      chartInstance.current.dispose();
-      chartInstance.current = null;
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.dispose();
+      chartInstanceRef.current = null;
     }
   }
 
@@ -126,11 +126,11 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @param opts - SetOption configuration
    */
   function renderChart(options: EChartsCoreOption, opts: SetOptionOpts = { notMerge: true }) {
-    if (!chartInstance.current)
+    if (!chartInstanceRef.current)
       return;
 
     const finalOptions = { ...options, backgroundColor: 'transparent' };
-    chartInstance.current.setOption(finalOptions, opts);
+    chartInstanceRef.current.setOption(finalOptions, opts);
     setChartOptions(finalOptions);
     toggleLoading(false);
   }
@@ -141,7 +141,7 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @param options - Partial chart options to update
    */
   function updateOptions(options: Partial<EChartsCoreOption>) {
-    if (!chartInstance.current || !chartOptions)
+    if (!chartInstanceRef.current || !chartOptions)
       return;
 
     const updatedOptions = { ...chartOptions, ...options };
@@ -154,7 +154,7 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @param options - Chart options
    */
   function setOptions(options: EChartsCoreOption) {
-    chartInstance.current?.setOption(options);
+    chartInstanceRef.current?.setOption(options);
   }
 
   /**
@@ -162,10 +162,10 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @descCN 调整图表尺寸
    */
   function resize() {
-    if (!chartInstance.current)
+    if (!chartInstanceRef.current)
       return;
 
-    chartInstance.current.resize({
+    chartInstanceRef.current.resize({
       animation: {
         duration: animation ? animationDuration : 0,
       },
@@ -183,9 +183,9 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @descCN 重置图表（清空图表数据）
    */
   function resetChart() {
-    if (!chartInstance.current)
+    if (!chartInstanceRef.current)
       return;
-    chartInstance.current.clear();
+    chartInstanceRef.current.clear();
   }
 
   /**
@@ -194,13 +194,13 @@ export function useECharts(domRef: RefObject<HTMLDivElement | null>, config: Con
    * @returns Chart instance or null
    */
   function getChartInstance() {
-    return chartInstance.current;
+    return chartInstanceRef.current;
   }
 
   // Monitor theme changes and reinitialize chart automatically (监听主题变化，自动重新初始化图表)
   useEffect(() => {
     function handleThemeChange() {
-      if (!chartInstance.current)
+      if (!chartInstanceRef.current)
         return;
 
       // Destroy old chart (销毁旧图表)

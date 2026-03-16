@@ -111,7 +111,7 @@ function RouteComponent() {
 
   // 监听滚动位置，触底加载下一页
   useEffect(() => {
-    const [lastItem] = [...rowVirtualizer.getVirtualItems()].reverse();
+    const [lastItem] = rowVirtualizer.getVirtualItems().toReversed();
 
     if (!isNotNil(lastItem)) {
       return;

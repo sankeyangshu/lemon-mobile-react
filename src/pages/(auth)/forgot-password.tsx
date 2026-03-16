@@ -17,6 +17,8 @@ export const Route = createFileRoute('/(auth)/forgot-password')({
   component: RouteComponent,
 });
 
+const PHONE_REG = /^(?:13\d|14[014-9]|15[0-35-9]|16[2567]|17[0-8]|18\d|19[0-35-9])\d{8}$/;
+
 function RouteComponent() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -26,8 +28,7 @@ function RouteComponent() {
    * 判断是否是合法手机号
    */
   const validPhone = (phone: string) => {
-    const reg = /^(?:13\d|14[014-9]|15[0-35-9]|16[2567]|17[0-8]|18\d|19[0-35-9])\d{8}$/;
-    return reg.test(phone);
+    return PHONE_REG.test(phone);
   };
 
   const formSchema = z.object({

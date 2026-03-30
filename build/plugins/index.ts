@@ -12,7 +12,7 @@ import { setupVConsolePlugin } from './vconsole';
 
 /**
  * 配置 vite 插件
- * @param viteEnv vite 环境变量配置文件键值队 object
+ * @param viteEnv vite 环境变量配置文件键值对 object
  * @param lastBuildTime 最后编译时间
  * @returns vitePlugins[]
  */

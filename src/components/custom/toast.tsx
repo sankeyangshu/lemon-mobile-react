@@ -57,6 +57,14 @@ interface ToastProps {
 
 export type ToastOptions = Omit<ToastProps, 'type'> | string;
 
+interface TempToastProps {
+  initialProps: ToastProps;
+  container: HTMLElement;
+  root: ReturnType<typeof createRoot>;
+  updateRef: ToastReturnType;
+  onClose?: () => void;
+}
+
 export interface ToastReturnType {
   /** 动态更新方法 */
   config: Dispatch<SetStateAction<ToastProps>>;
@@ -257,6 +265,75 @@ function parseOptions(message: ToastProps | string): ToastProps {
   return { message };
 }
 
+const TempToast: FC<TempToastProps> = ({ initialProps, container, root, updateRef, onClose }) => {
+  const [visible, setVisible] = useState(false);
+  const [state, setState] = useState<ToastProps>({ ...initialProps });
+  const timerRef = { current: 0 };
+
+  // clearDOM after animation
+  const internalOnClosed = useCallback(() => {
+    if (state.forbidClick) {
+      document.body.classList.remove('pointer-events-none');
+    }
+    setVisible(false);
+    const animationDuration = state.transitionDuration ?? defaultOptions.transitionDuration ?? 300;
+    window.setTimeout(() => {
+      root.unmount();
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+      }
+    }, animationDuration);
+  }, [state.forbidClick, state.transitionDuration, root, container]);
+
+  // close with animation
+  const destroy = useCallback(() => {
+    setVisible(false);
+    if (onClose)
+      onClose();
+  }, [onClose]);
+
+  updateRef.clear = internalOnClosed;
+
+  updateRef.config = useCallback(
+    (nextState) => {
+      setState((prev) => {
+        if (typeof nextState === 'function') {
+          return { ...prev, ...nextState(prev) };
+        }
+        return { ...prev, ...nextState };
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    setVisible(true);
+    syncClear();
+    toastArray.push(internalOnClosed);
+
+    const duration = state.duration ?? 0;
+    if (duration > 0) {
+      timerRef.current = window.setTimeout(destroy, duration);
+    }
+
+    return () => {
+      if (timerRef.current !== 0) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <BaseToast
+      {...state}
+      visible={visible}
+      teleport={() => container}
+      onClose={destroy}
+      onClosed={internalOnClosed}
+    />
+  );
+};
+
 // 可返回用于销毁此弹窗的方法
 function ToastFunc(p: ToastProps | string): ToastReturnType {
   const props = { ...defaultOptions, ...parseOptions(p) };
@@ -266,82 +343,21 @@ function ToastFunc(p: ToastProps | string): ToastReturnType {
     clear: () => null,
   };
 
-  let timer = 0;
   const { onClose, teleport } = props;
   const container = document.createElement('div');
   const bodyContainer = teleport?.() || document.body;
   bodyContainer.appendChild(container);
   const root = createRoot(container);
 
-  const TempToast = () => {
-    const [visible, setVisible] = useState(false);
-    const [state, setState] = useState<ToastProps>({ ...props });
-
-    // clearDOM after animation
-    const internalOnClosed = useCallback(() => {
-      if (state.forbidClick) {
-        document.body.classList.remove('pointer-events-none');
-      }
-      setVisible(false);
-      const animationDuration = state.transitionDuration ?? defaultOptions.transitionDuration ?? 300;
-      window.setTimeout(() => {
-        root.unmount();
-        if (container.parentNode) {
-          container.parentNode.removeChild(container);
-        }
-      }, animationDuration);
-    }, [state.forbidClick, state.transitionDuration]);
-
-    // close with animation
-    const destroy = useCallback(() => {
-      setVisible(false);
-      if (onClose)
-        onClose();
-    }, []);
-
-    update.clear = internalOnClosed;
-
-    update.config = useCallback(
-      (nextState) => {
-        setState((prev) => {
-          if (typeof nextState === 'function') {
-            return { ...prev, ...nextState(prev) };
-          }
-          return { ...prev, ...nextState };
-        });
-      },
-      [],
-    );
-
-    useEffect(() => {
-      setVisible(true);
-      syncClear();
-      toastArray.push(internalOnClosed);
-
-      const duration = state.duration ?? 0;
-      if (duration > 0) {
-        timer = window.setTimeout(destroy, duration);
-      }
-
-      return () => {
-        if (timer !== 0) {
-          window.clearTimeout(timer);
-        }
-      };
-    }, []);
-
-    return (
-      <BaseToast
-        {...state}
-        visible={visible}
-        teleport={() => container}
-        onClose={destroy}
-        onClosed={internalOnClosed}
-      />
-    );
-  };
-
-  root.render(<TempToast />);
+  root.render(
+    <TempToast
+      initialProps={props}
+      container={container}
+      root={root}
+      updateRef={update}
+      onClose={onClose}
+    />,
+  );
 
   return update;
 }

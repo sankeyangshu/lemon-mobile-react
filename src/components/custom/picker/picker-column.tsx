@@ -244,7 +244,6 @@ function PickerColumn(props: PickerColumnComponentProps) {
 
       animate(targetIndex);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, JSON.stringify(options)]);
 
   // 点击选项
